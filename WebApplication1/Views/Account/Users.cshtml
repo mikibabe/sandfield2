@@ -1,0 +1,183 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<head>
+    <title></title>
+    <style>
+        #editform {
+            display: none;
+        }
+    </style>
+</head>
+
+<h3>User Detail </h3>
+<br />
+<div id="editform">
+    <form>
+        <div class="form-group">
+            <label>User Id</label>
+            <input type="text" class="form-control" id="txtUserId" />
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="text" class="form-control" id="txtPassword" />
+        </div>
+        <div class="form-check">
+            <label>Group</label>
+            <input type="text" class="form-control" id="txtGroup" />
+        </div>
+        <div class="form-check">
+            <label>Role</label>
+            <input type="text" class="form-control" id="txtRole" />
+        </div> 
+        <div class="form-group" style="padding-top:30px">
+            <table>
+                <tr>
+                    <td><button id="btnCancel" type="button" class="btn">Cancel</button></td>
+                    <td style="padding-left:30px">
+                        <button id="btnSubmit" type="button" class="btn btn-primary">Submit</button>
+                    </td>
+                </tr>
+            </table> 
+        </div>
+    </form>
+</div>
+
+<table id="tbluser" class="table table-bordered table-responsive table-condensed">
+    <thead>
+        <tr class="btn-primary">
+            <th>#</th>
+            <th>User Id</th>
+            <th>Password</th>
+            <th>Group</th>
+            <th>Role</th>
+            <th>Edit</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section scripts{
+
+    <script> 
+        var editUserId;
+
+        $(function () {
+
+            /*var jqxhr = $.post('/Account/GetUserById', { id: 1  }, function () {
+                alert("success");
+            })
+            .done(function (data, textStatus, jqXHR) {
+                console.log(data);
+                loadUserList(data);
+
+            }).
+            .fail(function () {
+                alert("error");
+            })
+            .always(function () {
+                alert("finished");
+            });*/
+            loadUserList();
+
+
+        });
+
+        $("#btnSubmit").click(function () {
+
+            var p = {
+                Id: editUserId,
+                UserId: $("#txtUserId").val().trim(),
+                Password: $("#txtPassword").val().trim(),
+                Group: $("#txtGroup").val().trim(),
+                Role: $("#txtRole").val().trim()
+            }
+            $.post('/User/EditUser', p, function (data) {
+                if (data) {
+                    alert("Updated successfully!");
+                } else {
+                    alert("Failed to update!");
+                }
+            })
+            .done(function (data, textStatus, jqXHR) {
+                loadUserList();
+                $("#tbluser").show();
+                $("#editform").hide(); 
+            })
+            .fail(function (xhr, status, error) {
+                alert("Failed to update!");
+            })  
+            .always(function () {
+            });
+
+        });
+
+        $("#btnCancel").click(function () {
+            $("#tbluser").show();
+            $("#editform").hide();
+        });
+
+        var loadUserList = function () {
+
+            $("#tbluser tbody").empty();
+
+                $.get('/User/GetUserList', function (data) {
+                    var d = $.parseJSON(data); 
+                    bindUserList(d);
+                })
+                .done(function (data, textStatus, jqXHR) {
+                    
+                })
+                .fail(function (xhr, status, error) {
+                    alert(error);
+                })
+                .always(function () {
+                });
+        };
+
+
+
+        var loadUserDetails = function (id) {
+             
+               $.get('/User/GetUserById/' + id, function (data) {
+                    var d = $.parseJSON(data);
+                   bindUserDetails(d);
+                })
+                .done(function (data, textStatus, jqXHR) {
+
+                })
+                .fail(function (xhr, status, error) {
+                    alert(error);
+                })
+                .always(function () {
+                });
+        };
+
+        var editUser = function (id) {
+            editUserId = id;
+            $("#tbluser").hide();
+            $("#editform").show();
+            loadUserDetails(id);
+        };
+
+        var bindUserList = function (d) {
+            $.each(d, function (i) {
+                i++;
+                var markup = "<tr><td>" + i + "</td><td>" + this.UserId + "</td><td>" + this.Password + "</td><td>" + this.Group + "</td><td>"
+                    + this.Role + "</td><td><a onclick='editUser(" + this.Id + ")'>Edit</a></td></tr>";
+                $("#tbluser tbody").append(markup);
+            })
+        };
+        var bindUserDetails = function (d) {
+            $("#txtUserId").val(d.UserId);
+            $("#txtPassword").val(d.Password);
+            $("#txtGroup").val(d.Group);
+            $("#txtRole").val(d.Role);
+        };
+
+    </script>
+}
+
+
+
